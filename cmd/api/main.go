@@ -28,11 +28,15 @@ func main() {
 	categoryRepo := repository.NewCategoryRepository(dbConn)
 	categoryUseCase := usecase.NewCategoryUseCase(logger, categoryRepo)
 
+	productRepo := repository.NewProductRepository(dbConn)
+	productUseCase := usecase.NewProductUseCase(logger, productRepo)
+
 	r := gin.Default()
 
 	api := r.Group("/api/v1")
 	{
-		router.RegisterCategory(api, categoryUseCase)
+		router.RegisterCategoryRouter(api, categoryUseCase)
+		router.RegisterProductRouter(api, productUseCase)
 	}
 
 	if err := r.Run(config.Server.Port); err != nil {

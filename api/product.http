@@ -1,0 +1,18 @@
+###
+POST http://localhost:8080/api/v1/products
+Content-Type: application/json
+
+{
+  "name": "Casaco",
+  "image": "http://test.com",
+  "price": 54.44,
+  "description": "Casaco para neve"
+}
+
+###
+GET http://localhost:8080/api/v1/products
+Content-Type: application/json
+
+###
+GET http://localhost:8080/api/v1/products/ce3a4f88-1644-11f0-8c57-6242c8e67743
+Content-Type: application/json

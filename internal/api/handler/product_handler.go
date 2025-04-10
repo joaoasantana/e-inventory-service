@@ -10,16 +10,16 @@ import (
 	"net/http"
 )
 
-type CategoryHandler struct {
-	category *usecase.CategoryUseCase
+type ProductHandler struct {
+	product *usecase.ProductUseCase
 }
 
-func NewCategoryHandler(category *usecase.CategoryUseCase) *CategoryHandler {
-	return &CategoryHandler{category}
+func NewProductHandler(product *usecase.ProductUseCase) *ProductHandler {
+	return &ProductHandler{product}
 }
 
-func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
-	var requestBody dto.CategoryRequest
+func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
+	var requestBody dto.ProductRequest
 
 	if err := ctx.ShouldBind(&requestBody); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, utils.ErrorResponse{
@@ -32,17 +32,19 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 		return
 	}
 
-	modelCategory := &model.Category{
+	productModel := &model.Product{
 		Name:        requestBody.Name,
+		Image:       requestBody.Image,
+		Price:       requestBody.Price,
 		Description: requestBody.Description,
 	}
 
-	categoryID, err := h.category.Create(modelCategory)
+	productID, err := h.product.Create(productModel)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusInternalServerError,
-				Message: "Error while creating category",
+				Message: "Error while creating product",
 			},
 			Error: err.Error(),
 		})
@@ -52,45 +54,47 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, utils.SuccessResponse{
 		Status: utils.StatusResponse{
 			Code:    http.StatusCreated,
-			Message: "Category created",
+			Message: "Product created",
 		},
-		Data: categoryID,
+		Data: productID,
 	})
 }
 
-func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
-	categories, err := h.category.FetchAll()
+func (h *ProductHandler) FetchAllProducts(ctx *gin.Context) {
+	products, err := h.product.FetchAll()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusInternalServerError,
-				Message: "Error while fetching categories",
+				Message: "Error while fetching products",
 			},
 			Error: err.Error(),
 		})
 		return
 	}
 
-	var result []dto.CategoryResponse
+	var result []dto.ProductResponse
 
-	for _, category := range categories {
-		result = append(result, dto.CategoryResponse{
-			UUID:        category.UUID,
-			Name:        category.Name,
-			Description: category.Description,
+	for _, product := range products {
+		result = append(result, dto.ProductResponse{
+			UUID:        product.UUID,
+			Name:        product.Name,
+			Image:       product.Image,
+			Price:       product.Price,
+			Description: product.Description,
 		})
 	}
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse{
 		Status: utils.StatusResponse{
 			Code:    http.StatusOK,
-			Message: "Categories fetched",
+			Message: "Products fetched",
 		},
 		Data: result,
 	})
 }
 
-func (h *CategoryHandler) FetchCategoryByID(ctx *gin.Context) {
+func (h *ProductHandler) FetchProductByID(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	if id == "" {
@@ -99,33 +103,35 @@ func (h *CategoryHandler) FetchCategoryByID(ctx *gin.Context) {
 				Code:    http.StatusBadRequest,
 				Message: "invalid request body",
 			},
-			Error: errors.New("missing category id").Error(), // todo
+			Error: errors.New("missing product id").Error(), // todo
 		})
 		return
 	}
 
-	category, err := h.category.FetchByID(id)
+	product, err := h.product.FetchByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusInternalServerError,
-				Message: "Error while fetching category",
+				Message: "Error while fetching product",
 			},
 			Error: err.Error(),
 		})
 		return
 	}
 
-	result := dto.CategoryResponse{
-		UUID:        category.UUID,
-		Name:        category.Name,
-		Description: category.Description,
+	result := dto.ProductResponse{
+		UUID:        product.UUID,
+		Name:        product.Name,
+		Image:       product.Image,
+		Price:       product.Price,
+		Description: product.Description,
 	}
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse{
 		Status: utils.StatusResponse{
 			Code:    http.StatusOK,
-			Message: "Category fetched",
+			Message: "Product fetched",
 		},
 		Data: result,
 	})

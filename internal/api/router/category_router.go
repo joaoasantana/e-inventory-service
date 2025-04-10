@@ -10,7 +10,7 @@ const (
 	relativePATH = "categories"
 )
 
-func RegisterCategory(api *gin.RouterGroup, category *usecase.CategoryUseCase) {
+func RegisterCategoryRouter(api *gin.RouterGroup, category *usecase.CategoryUseCase) {
 	h := handler.NewCategoryHandler(category)
 
 	categoriesAPI := api.Group(relativePATH)
