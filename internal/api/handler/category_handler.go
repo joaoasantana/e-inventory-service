@@ -26,13 +26,9 @@ func NewCategoryHandler(logger *zap.Logger, categoryUseCase *usecase.CategoryUse
 }
 
 func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
-	h.logger.Info("create", zap.String("status", "creating"), zap.String("method", "POST"))
-
 	var requestBody dto.CategoryRequest
 
 	if err := ctx.ShouldBind(&requestBody); err != nil {
-		h.logger.Error("create", zap.String("status", "error"), zap.String("method", "POST"), zap.Error(err))
-
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusBadRequest,
@@ -50,8 +46,6 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 
 	categoryID, err := h.categoryUseCase.Create(modelCategory)
 	if err != nil {
-		h.logger.Error("create", zap.String("status", "error"), zap.String("method", "POST"), zap.Error(err))
-
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusInternalServerError,
@@ -61,8 +55,6 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 		})
 		return
 	}
-
-	h.logger.Info("create", zap.String("status", "created"), zap.String("method", "POST"))
 
 	ctx.JSON(http.StatusCreated, utils.SuccessResponse{
 		Status: utils.StatusResponse{
@@ -74,12 +66,8 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 }
 
 func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
-	h.logger.Info("fetchAll", zap.String("status", "fetching"), zap.String("method", "GET"))
-
 	categories, err := h.categoryUseCase.FetchAll()
 	if err != nil {
-		h.logger.Error("fetchAll", zap.String("status", "error"), zap.String("method", "GET"), zap.Error(err))
-
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusInternalServerError,
@@ -89,8 +77,6 @@ func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
 		})
 		return
 	}
-
-	h.logger.Info("fetchAll", zap.String("status", "mapping"), zap.String("method", "GET"), zap.Any("categories", categories))
 
 	var result []dto.CategoryResponse
 
@@ -102,8 +88,6 @@ func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
 		})
 	}
 
-	h.logger.Info("fetchAll", zap.String("status", "fetched"), zap.String("method", "GET"), zap.Any("categories", result))
-
 	ctx.JSON(http.StatusOK, utils.SuccessResponse{
 		Status: utils.StatusResponse{
 			Code:    http.StatusOK,
@@ -114,28 +98,21 @@ func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
 }
 
 func (h *CategoryHandler) FetchCategoryByID(ctx *gin.Context) {
-	h.logger.Info("fetchByID", zap.String("status", "fetching"), zap.String("method", "GET"))
-
 	id := ctx.Param("id")
 
 	if id == "" {
-		err := errors.New("missing category id")
-		h.logger.Error("fetchByID", zap.String("status", "error"), zap.String("method", "GET"), zap.Error(err))
-
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusBadRequest,
 				Message: "invalid request body",
 			},
-			Error: err.Error(),
+			Error: errors.New("missing category id").Error(),
 		})
 		return
 	}
 
 	category, err := h.categoryUseCase.FetchByID(id)
 	if err != nil {
-		h.logger.Error("fetchByID", zap.String("status", "error"), zap.String("method", "GET"), zap.Error(err))
-
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
 				Code:    http.StatusInternalServerError,
@@ -146,15 +123,11 @@ func (h *CategoryHandler) FetchCategoryByID(ctx *gin.Context) {
 		return
 	}
 
-	h.logger.Info("fetchByID", zap.String("status", "mapping"), zap.String("method", "GET"), zap.Any("category", category))
-
 	result := dto.CategoryResponse{
 		UUID:        category.UUID,
 		Name:        category.Name,
 		Description: category.Description,
 	}
-
-	h.logger.Info("fetchByID", zap.String("status", "fetched"), zap.String("method", "GET"), zap.Any("category", result))
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse{
 		Status: utils.StatusResponse{
