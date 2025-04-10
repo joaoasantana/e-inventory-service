@@ -27,13 +27,12 @@ func main() {
 	// Dependency Injection
 	categoryRepo := repository.NewCategoryRepository(dbConn)
 	categoryUseCase := usecase.NewCategoryUseCase(logger, categoryRepo)
-	categoryRouter := router.NewCategoryRouter(logger, categoryUseCase)
 
 	r := gin.Default()
 
 	api := r.Group("/api/v1")
 	{
-		categoryRouter.Init(api)
+		router.RegisterCategory(api, categoryUseCase)
 	}
 
 	if err := r.Run(config.Server.Port); err != nil {

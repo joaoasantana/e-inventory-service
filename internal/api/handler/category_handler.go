@@ -7,22 +7,15 @@ import (
 	"github.com/joaoasantana/e-inventory-service/internal/domain/model"
 	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
 	"github.com/joaoasantana/e-inventory-service/pkg/utils"
-	"go.uber.org/zap"
 	"net/http"
 )
 
 type CategoryHandler struct {
-	logger          *zap.Logger
-	categoryUseCase *usecase.CategoryUseCase
+	category *usecase.CategoryUseCase
 }
 
-func NewCategoryHandler(logger *zap.Logger, categoryUseCase *usecase.CategoryUseCase) *CategoryHandler {
-	mLogger := logger.With(
-		zap.String("type", "handler"),
-		zap.String("domain", "category"),
-	)
-
-	return &CategoryHandler{mLogger, categoryUseCase}
+func NewCategoryHandler(category *usecase.CategoryUseCase) *CategoryHandler {
+	return &CategoryHandler{category}
 }
 
 func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
@@ -44,7 +37,7 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 		Description: requestBody.Description,
 	}
 
-	categoryID, err := h.categoryUseCase.Create(modelCategory)
+	categoryID, err := h.category.Create(modelCategory)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
@@ -66,7 +59,7 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 }
 
 func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
-	categories, err := h.categoryUseCase.FetchAll()
+	categories, err := h.category.FetchAll()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
@@ -111,7 +104,7 @@ func (h *CategoryHandler) FetchCategoryByID(ctx *gin.Context) {
 		return
 	}
 
-	category, err := h.categoryUseCase.FetchByID(id)
+	category, err := h.category.FetchByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
