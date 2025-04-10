@@ -29,7 +29,7 @@ func main() {
 	categoryUseCase := usecase.NewCategoryUseCase(logger, categoryRepo)
 
 	productRepo := repository.NewProductRepository(dbConn)
-	productUseCase := usecase.NewProductUseCase(logger, productRepo)
+	productUseCase := usecase.NewProductUseCase(logger, categoryRepo, productRepo)
 
 	r := gin.Default()
 

@@ -7,6 +7,7 @@ import (
 
 type Product struct {
 	UUID        uuid.UUID `db:"id"`
+	CategoryID  uuid.UUID `db:"category_id"`
 	Name        string    `db:"name"`
 	Image       string    `db:"image"`
 	Price       float64   `db:"price"`
@@ -16,6 +17,10 @@ type Product struct {
 func (entity *Product) ValidateRules() error {
 	if entity.UUID == uuid.Nil {
 		return errors.New("invalid uuid")
+	}
+
+	if entity.CategoryID == uuid.Nil {
+		return errors.New("invalid category id")
 	}
 
 	if entity.Name == "" || len(entity.Name) > 255 {

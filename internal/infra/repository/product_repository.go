@@ -16,8 +16,8 @@ func NewProductRepository(dbConn *sqlx.DB) *ProductRepository {
 }
 
 func (r *ProductRepository) Create(product *entity.Product) error {
-	query := `INSERT INTO products (id, name, image, price, description)
-		 	  VALUES (:id, :name, :image, :price, :description)`
+	query := `INSERT INTO products (id, category_id, name, image, price, description)
+		 	  VALUES (:id, :category_id, :name, :image, :price, :description)`
 
 	result, err := r.dbConn.NamedExec(query, product)
 	if err != nil {
@@ -33,7 +33,7 @@ func (r *ProductRepository) Create(product *entity.Product) error {
 }
 
 func (r *ProductRepository) FindAll() ([]entity.Product, error) {
-	query := `SELECT id, name, image, price, description
+	query := `SELECT id, category_id, name, image, price, description
 			  FROM products`
 
 	var products []entity.Product
@@ -46,7 +46,7 @@ func (r *ProductRepository) FindAll() ([]entity.Product, error) {
 }
 
 func (r *ProductRepository) FindByID(id uuid.UUID) (*entity.Product, error) {
-	query := `SELECT id, name, image, price, description
+	query := `SELECT id, category_id, name, image, price, description
 			  FROM products
 			  WHERE id = $1`
 
@@ -60,7 +60,7 @@ func (r *ProductRepository) FindByID(id uuid.UUID) (*entity.Product, error) {
 }
 
 func (r *ProductRepository) FindByName(name string) (*entity.Product, error) {
-	query := `SELECT id, name, image, price, description
+	query := `SELECT id, category_id, name, image, price, description
 			  FROM products
 			  WHERE name = $1`
 

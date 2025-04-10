@@ -10,3 +10,12 @@ type Product struct {
 	Price       float64
 	Description string
 }
+
+type ProductDetail struct {
+	UUID        uuid.UUID
+	Category    Category
+	Name        string
+	Image       string
+	Price       float64
+	Description string
+}

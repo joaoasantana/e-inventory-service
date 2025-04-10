@@ -8,7 +8,7 @@ type CategoryRequest struct {
 }
 
 type CategoryResponse struct {
-	UUID        uuid.UUID `json:"uuid"          extensions:"x-order:0"`
+	UUID        uuid.UUID `json:"id"            extensions:"x-order:0"`
 	Name        string    `json:"name"          extensions:"x-order:1"`
 	Description string    `json:"description"   extensions:"x-order:2"`
 }

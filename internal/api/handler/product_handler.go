@@ -33,6 +33,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	}
 
 	productModel := &model.Product{
+		CategoryID:  requestBody.CategoryID,
 		Name:        requestBody.Name,
 		Image:       requestBody.Image,
 		Price:       requestBody.Price,
@@ -78,6 +79,7 @@ func (h *ProductHandler) FetchAllProducts(ctx *gin.Context) {
 	for _, product := range products {
 		result = append(result, dto.ProductResponse{
 			UUID:        product.UUID,
+			Category:    product.CategoryID,
 			Name:        product.Name,
 			Image:       product.Image,
 			Price:       product.Price,
@@ -120,8 +122,15 @@ func (h *ProductHandler) FetchProductByID(ctx *gin.Context) {
 		return
 	}
 
-	result := dto.ProductResponse{
+	categoryResponse := dto.CategoryResponse{
+		UUID:        product.Category.UUID,
+		Name:        product.Category.Name,
+		Description: product.Category.Description,
+	}
+
+	result := dto.ProductDetailResponse{
 		UUID:        product.UUID,
+		Category:    categoryResponse,
 		Name:        product.Name,
 		Image:       product.Image,
 		Price:       product.Price,
