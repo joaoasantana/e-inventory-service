@@ -2,7 +2,11 @@ module github.com/joaoasantana/e-inventory-service
 
 go 1.24.1
 
-require github.com/IBM/sarama v1.45.1
+require (
+	github.com/IBM/sarama v1.45.1
+	github.com/google/uuid v1.6.0
+	github.com/jmoiron/sqlx v1.4.0
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
