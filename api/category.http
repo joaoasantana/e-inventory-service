@@ -10,3 +10,7 @@ Content-Type: application/json
 ###
 GET http://localhost:8080/api/v1/categories
 Content-Type: application/json
+
+###
+GET http://localhost:8080/api/v1/categories/92b00b80-1624-11f0-97c1-6242c8e67743
+Content-Type: application/json

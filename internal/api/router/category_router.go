@@ -27,5 +27,6 @@ func (r *CategoryRouter) Init(api *gin.RouterGroup) {
 	{
 		categoriesAPI.POST("/", h.CreateCategory)
 		categoriesAPI.GET("/", h.FetchAllCategories)
+		categoriesAPI.GET("/:id", h.FetchCategoryByID)
 	}
 }

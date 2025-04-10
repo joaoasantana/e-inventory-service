@@ -26,6 +26,13 @@ func NewCategoryUseCase(logger *zap.Logger, repository repository.CategoryReposi
 func (uc *CategoryUseCase) Create(category *model.Category) (uuid.UUID, error) {
 	uc.logger.Info("create", zap.String("status", "creating"), zap.Any("category", category))
 
+	if _, err := uc.repository.FindByName(category.Name); err == nil {
+		err = errors.New("category already exists")
+		uc.logger.Info("create", zap.String("status", "creating"), zap.Any("category", category), zap.Error(err))
+
+		return uuid.Nil, err
+	}
+
 	id, err := uuid.NewUUID()
 	if err != nil {
 		uc.logger.Error("create", zap.String("status", "error"), zap.Error(err))
@@ -63,13 +70,14 @@ func (uc *CategoryUseCase) FetchAll() ([]model.Category, error) {
 	if err != nil {
 		uc.logger.Error("fetchAll", zap.String("status", "error"), zap.Error(err))
 
-		return nil, errors.New("failed to fetch all categories")
+		return nil, errors.New("categories not found")
 	}
 
 	if categories == nil || len(categories) == 0 {
-		uc.logger.Error("fetchAll", zap.String("status", "error"), zap.Error(errors.New("no categories found")))
+		err = errors.New("categories not found")
+		uc.logger.Error("fetchAll", zap.String("status", "error"), zap.Error(err))
 
-		return nil, errors.New("categories is empty")
+		return nil, err
 	}
 
 	uc.logger.Info("fetchAll", zap.String("status", "mapping"), zap.Any("categories", categories))
@@ -87,4 +95,41 @@ func (uc *CategoryUseCase) FetchAll() ([]model.Category, error) {
 	uc.logger.Info("fetchAll", zap.String("status", "fetched"), zap.Any("categories", result))
 
 	return result, nil
+}
+
+func (uc *CategoryUseCase) FetchByID(id string) (*model.Category, error) {
+	uc.logger.Info("FetchByID", zap.String("status", "fetching"), zap.String("id", id))
+
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		uc.logger.Error("FetchByID", zap.String("status", "error"), zap.String("id", id), zap.Error(err))
+
+		return nil, errors.New("failed to parse uuid")
+	}
+
+	category, err := uc.repository.FindByID(parsedID)
+	if err != nil {
+		uc.logger.Error("FetchByID", zap.String("status", "error"), zap.String("id", id), zap.Error(err))
+
+		return nil, errors.New("category not found")
+	}
+
+	if category == nil {
+		err = errors.New("category not found")
+		uc.logger.Error("FetchByID", zap.String("status", "error"), zap.String("id", id), zap.Error(err))
+
+		return nil, err
+	}
+
+	uc.logger.Info("FetchByID", zap.String("status", "mapping"), zap.Any("category", category))
+
+	result := model.Category{
+		UUID:        category.UUID,
+		Name:        category.Name,
+		Description: category.Description,
+	}
+
+	uc.logger.Info("FetchByID", zap.String("status", "fetched"), zap.Any("category", result))
+
+	return &result, nil
 }
