@@ -27,3 +27,5 @@ go.work.sum
 # default file
 .idea
 .config
+
+tmp

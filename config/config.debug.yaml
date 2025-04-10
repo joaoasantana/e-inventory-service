@@ -1,0 +1,18 @@
+app:
+  name: "e-inventory-service"
+  version: "1.0.0"
+  env: "debug"
+
+database:
+  driver: "postgres"
+  host: "localhost"
+  port: "5432"
+  name: "e-inventory-db"
+
+kafka:
+  topic: "my_topic"
+  brokers: [ "localhost:19092" ]
+
+server:
+  host: "localhost:8080"
+  port: ":8080"
