@@ -1,4 +1,4 @@
-package utils
+package conn
 
 import (
 	"go.elastic.co/ecszap"
@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func InitDebugLogger() *zap.Logger {
+func DebugLogger() *zap.Logger {
 	encoder := ecszap.NewDefaultEncoderConfig()
 	encoderCore := ecszap.NewCore(encoder, os.Stdout, zapcore.DebugLevel)
 

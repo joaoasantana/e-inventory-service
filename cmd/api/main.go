@@ -8,21 +8,21 @@ import (
 	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
 	"github.com/joaoasantana/e-inventory-service/internal/infra/repository"
 	"github.com/joaoasantana/e-inventory-service/pkg/conn"
-	"github.com/joaoasantana/e-inventory-service/pkg/utils"
 	"go.uber.org/zap"
 )
 
 func main() {
 	config := configs.LoadAllConfig()
 
-	logger := utils.InitDebugLogger().With(
+	logger := conn.DebugLogger()
+	dbConn := conn.SQLDatabase(config.Database)
+
+	defer closeVariables(dbConn, logger)
+
+	logger = logger.With(
 		zap.Any("app", config.App),
 		zap.Any("server", config.Server),
 	)
-
-	dbConn := conn.SQLDatabase(logger, config.Database)
-
-	defer closeVariables(dbConn, logger)
 
 	// Dependency Injection
 	categoryRepo := repository.NewCategoryRepository(dbConn)
