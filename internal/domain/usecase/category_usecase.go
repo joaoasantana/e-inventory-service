@@ -10,23 +10,14 @@ import (
 )
 
 type CategoryUseCase struct {
-	logger   *zap.Logger
-	category repository.CategoryRepository
-}
-
-func NewCategoryUseCase(logger *zap.Logger, repository repository.CategoryRepository) *CategoryUseCase {
-	mLogger := logger.With(
-		zap.String("type", "service"),
-		zap.String("domain", "category"),
-	)
-
-	return &CategoryUseCase{mLogger, repository}
+	Logger     *zap.Logger
+	Repository repository.CategoryRepository
 }
 
 func (uc *CategoryUseCase) Create(category *model.Category) (uuid.UUID, error) {
-	mLogger := uc.logger.With(zap.String("method", "create"))
+	mLogger := uc.Logger.With(zap.String("method", "create"))
 
-	if _, err := uc.category.FindByName(category.Name); err == nil {
+	if _, err := uc.Repository.FindByName(category.Name); err == nil {
 		mLogger.Error("error", zap.Error(errors.New("category already exists"))) // todo
 		return uuid.Nil, errors.New("category already exists")                   // todo
 	}
@@ -48,7 +39,7 @@ func (uc *CategoryUseCase) Create(category *model.Category) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 
-	if err = uc.category.Create(categoryEntity); err != nil {
+	if err = uc.Repository.Create(categoryEntity); err != nil {
 		mLogger.Error("error", zap.Error(err))
 		return uuid.Nil, errors.New("failed to create category")
 	}
@@ -58,9 +49,9 @@ func (uc *CategoryUseCase) Create(category *model.Category) (uuid.UUID, error) {
 }
 
 func (uc *CategoryUseCase) FetchAll() ([]model.Category, error) {
-	mLogger := uc.logger.With(zap.String("method", "fetchAll"))
+	mLogger := uc.Logger.With(zap.String("method", "fetchAll"))
 
-	categories, err := uc.category.FindAll()
+	categories, err := uc.Repository.FindAll()
 	if err != nil {
 		mLogger.Error("error", zap.Error(err))
 		return nil, err
@@ -86,7 +77,7 @@ func (uc *CategoryUseCase) FetchAll() ([]model.Category, error) {
 }
 
 func (uc *CategoryUseCase) FetchByID(id string) (*model.Category, error) {
-	mLogger := uc.logger.With(zap.String("method", "findByID"))
+	mLogger := uc.Logger.With(zap.String("method", "findByID"))
 
 	parsedID, err := uuid.Parse(id)
 	if err != nil {
@@ -94,7 +85,7 @@ func (uc *CategoryUseCase) FetchByID(id string) (*model.Category, error) {
 		return nil, errors.New("failed to parse uuid") // todo
 	}
 
-	category, err := uc.category.FindByID(parsedID)
+	category, err := uc.Repository.FindByID(parsedID)
 	if err != nil {
 		mLogger.Error("error", zap.String("id", id), zap.Error(err))
 		return nil, err

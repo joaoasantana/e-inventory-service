@@ -5,8 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joaoasantana/e-inventory-service/internal/api/router"
 	"github.com/joaoasantana/e-inventory-service/internal/configs"
-	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
-	"github.com/joaoasantana/e-inventory-service/internal/infra/repository"
 	"github.com/joaoasantana/e-inventory-service/pkg/conn"
 	"go.uber.org/zap"
 )
@@ -14,29 +12,23 @@ import (
 func main() {
 	config := configs.LoadAllConfig()
 
-	logger := conn.DebugLogger()
-	dbConn := conn.SQLDatabase(config.Database)
-
-	defer closeVariables(dbConn, logger)
-
-	logger = logger.With(
+	logger := conn.DebugLogger().With(
 		zap.Any("app", config.App),
 		zap.Any("server", config.Server),
 	)
 
-	// Dependency Injection
-	categoryRepo := repository.NewCategoryRepository(dbConn)
-	categoryUseCase := usecase.NewCategoryUseCase(logger, categoryRepo)
+	dbConn := conn.SQLDatabase(config.Database)
 
-	productRepo := repository.NewProductRepository(dbConn)
-	productUseCase := usecase.NewProductUseCase(logger, categoryRepo, productRepo)
+	defer closeVariables(dbConn, logger)
 
 	r := gin.Default()
 
 	api := r.Group("/api/v1")
 	{
-		router.RegisterCategoryRouter(api, categoryUseCase)
-		router.RegisterProductRouter(api, productUseCase)
+
+		router.InitCategoryRoute(dbConn, logger, api)
+		router.InitProductRoute(dbConn, logger, api)
+		router.InitSupplierRoute(dbConn, logger, api)
 	}
 
 	if err := r.Run(config.Server.Port); err != nil {

@@ -7,15 +7,13 @@ import (
 	"github.com/joaoasantana/e-inventory-service/internal/domain/model"
 	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
 	"github.com/joaoasantana/e-inventory-service/pkg/utils"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 type ProductHandler struct {
-	product *usecase.ProductUseCase
-}
-
-func NewProductHandler(product *usecase.ProductUseCase) *ProductHandler {
-	return &ProductHandler{product}
+	Logger  *zap.Logger
+	UseCase *usecase.ProductUseCase
 }
 
 func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
@@ -40,7 +38,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		Description: requestBody.Description,
 	}
 
-	productID, err := h.product.Create(productModel)
+	productID, err := h.UseCase.Create(productModel)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
@@ -62,7 +60,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 }
 
 func (h *ProductHandler) FetchAllProducts(ctx *gin.Context) {
-	products, err := h.product.FetchAll()
+	products, err := h.UseCase.FetchAll()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
@@ -110,7 +108,7 @@ func (h *ProductHandler) FetchProductByID(ctx *gin.Context) {
 		return
 	}
 
-	product, err := h.product.FetchByID(id)
+	product, err := h.UseCase.FetchByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{

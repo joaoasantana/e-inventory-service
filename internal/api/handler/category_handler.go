@@ -7,15 +7,13 @@ import (
 	"github.com/joaoasantana/e-inventory-service/internal/domain/model"
 	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
 	"github.com/joaoasantana/e-inventory-service/pkg/utils"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 type CategoryHandler struct {
-	category *usecase.CategoryUseCase
-}
-
-func NewCategoryHandler(category *usecase.CategoryUseCase) *CategoryHandler {
-	return &CategoryHandler{category}
+	Logger  *zap.Logger
+	UseCase *usecase.CategoryUseCase
 }
 
 func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
@@ -37,7 +35,7 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 		Description: requestBody.Description,
 	}
 
-	categoryID, err := h.category.Create(modelCategory)
+	categoryID, err := h.UseCase.Create(modelCategory)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
@@ -59,7 +57,7 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 }
 
 func (h *CategoryHandler) FetchAllCategories(ctx *gin.Context) {
-	categories, err := h.category.FetchAll()
+	categories, err := h.UseCase.FetchAll()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{
@@ -104,7 +102,7 @@ func (h *CategoryHandler) FetchCategoryByID(ctx *gin.Context) {
 		return
 	}
 
-	category, err := h.category.FetchByID(id)
+	category, err := h.UseCase.FetchByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status: utils.StatusResponse{

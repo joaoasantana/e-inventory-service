@@ -2,21 +2,31 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	"github.com/joaoasantana/e-inventory-service/internal/api/handler"
 	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
+	"github.com/joaoasantana/e-inventory-service/internal/infra/repository"
+	"go.uber.org/zap"
 )
 
-const (
-	relativePath = "/products"
-)
+const productRoute = "/products"
 
-func RegisterProductRouter(api *gin.RouterGroup, product *usecase.ProductUseCase) {
-	h := handler.NewProductHandler(product)
+func InitProductRoute(db *sqlx.DB, logger *zap.Logger, api *gin.RouterGroup) {
+	productUseCase := usecase.NewProductUseCase(
+		logger,
+		repository.NewCategoryRepository(db),
+		repository.NewProductRepository(db),
+	)
 
-	productsAPI := api.Group(relativePath)
+	productHandler := handler.ProductHandler{
+		Logger:  logger,
+		UseCase: productUseCase,
+	}
+
+	routerGroup := api.Group(productRoute)
 	{
-		productsAPI.POST("/", h.CreateProduct)
-		productsAPI.GET("/", h.FetchAllProducts)
-		productsAPI.GET("/:id", h.FetchProductByID)
+		routerGroup.POST("/", productHandler.CreateProduct)
+		routerGroup.GET("/", productHandler.FetchAllProducts)
+		routerGroup.GET("/:id", productHandler.FetchProductByID)
 	}
 }

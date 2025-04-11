@@ -2,21 +2,31 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	"github.com/joaoasantana/e-inventory-service/internal/api/handler"
 	"github.com/joaoasantana/e-inventory-service/internal/domain/usecase"
+	"github.com/joaoasantana/e-inventory-service/internal/infra/repository"
+	"go.uber.org/zap"
 )
 
-const (
-	relativePATH = "categories"
-)
+const categoryRoute = "/categories"
 
-func RegisterCategoryRouter(api *gin.RouterGroup, category *usecase.CategoryUseCase) {
-	h := handler.NewCategoryHandler(category)
+func InitCategoryRoute(db *sqlx.DB, logger *zap.Logger, api *gin.RouterGroup) {
+	categoryUseCase := &usecase.CategoryUseCase{
+		Logger:     logger,
+		Repository: repository.NewCategoryRepository(db),
+	}
 
-	categoriesAPI := api.Group(relativePATH)
+	categoryHandler := handler.CategoryHandler{
+		Logger:  logger,
+		UseCase: categoryUseCase,
+	}
+
+	categoriesAPI := api.Group(categoryRoute)
 	{
-		categoriesAPI.POST("/", h.CreateCategory)
-		categoriesAPI.GET("/", h.FetchAllCategories)
-		categoriesAPI.GET("/:id", h.FetchCategoryByID)
+		categoriesAPI.POST("/", categoryHandler.CreateCategory)
+
+		categoriesAPI.GET("/", categoryHandler.FetchAllCategories)
+		categoriesAPI.GET("/:id", categoryHandler.FetchCategoryByID)
 	}
 }
