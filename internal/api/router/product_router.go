@@ -12,11 +12,11 @@ import (
 const productRoute = "/products"
 
 func InitProductRoute(db *sqlx.DB, logger *zap.Logger, api *gin.RouterGroup) {
-	productUseCase := usecase.NewProductUseCase(
-		logger,
-		repository.NewCategoryRepository(db),
-		repository.NewProductRepository(db),
-	)
+	productUseCase := &usecase.ProductUseCase{
+		Logger:          logger,
+		CategoryUseCase: repository.NewCategoryRepository(db),
+		ProductUseCase:  repository.NewProductRepository(db),
+	}
 
 	productHandler := handler.ProductHandler{
 		Logger:  logger,
@@ -26,6 +26,7 @@ func InitProductRoute(db *sqlx.DB, logger *zap.Logger, api *gin.RouterGroup) {
 	routerGroup := api.Group(productRoute)
 	{
 		routerGroup.POST("/", productHandler.CreateProduct)
+
 		routerGroup.GET("/", productHandler.FetchAllProducts)
 		routerGroup.GET("/:id", productHandler.FetchProductByID)
 	}

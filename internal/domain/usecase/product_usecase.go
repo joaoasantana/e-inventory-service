@@ -10,29 +10,20 @@ import (
 )
 
 type ProductUseCase struct {
-	logger   *zap.Logger
-	category repository.CategoryRepository
-	product  repository.ProductRepository
-}
-
-func NewProductUseCase(logger *zap.Logger, category repository.CategoryRepository, product repository.ProductRepository) *ProductUseCase {
-	mLogger := logger.With(
-		zap.String("type", "service"),
-		zap.String("domain", "product"),
-	)
-
-	return &ProductUseCase{mLogger, category, product}
+	Logger          *zap.Logger
+	CategoryUseCase repository.CategoryRepository
+	ProductUseCase  repository.ProductRepository
 }
 
 func (uc *ProductUseCase) Create(product *model.Product) (uuid.UUID, error) {
-	mLogger := uc.logger.With(zap.String("method", "create"))
+	mLogger := uc.Logger.With(zap.String("method", "create"))
 
-	if _, err := uc.product.FindByName(product.Name); err == nil {
+	if _, err := uc.ProductUseCase.FindByName(product.Name); err == nil {
 		mLogger.Error("error", zap.Error(errors.New("product already exists"))) // todo
 		return uuid.Nil, errors.New("product already exists")                   // todo
 	}
 
-	if _, err := uc.category.FindByID(product.CategoryID); err != nil {
+	if _, err := uc.CategoryUseCase.FindByID(product.CategoryID); err != nil {
 		mLogger.Error("error", zap.Error(errors.New("category does not exist"))) // todo
 		return uuid.Nil, errors.New("category does not exist")                   // todo
 	}
@@ -57,7 +48,7 @@ func (uc *ProductUseCase) Create(product *model.Product) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 
-	if err = uc.product.Create(productEntity); err != nil {
+	if err = uc.ProductUseCase.Create(productEntity); err != nil {
 		mLogger.Error("error", zap.Error(err))
 		return uuid.Nil, errors.New("failed to create product")
 	}
@@ -67,9 +58,9 @@ func (uc *ProductUseCase) Create(product *model.Product) (uuid.UUID, error) {
 }
 
 func (uc *ProductUseCase) FetchAll() ([]model.Product, error) {
-	mLogger := uc.logger.With(zap.String("method", "fetchAll"))
+	mLogger := uc.Logger.With(zap.String("method", "fetchAll"))
 
-	products, err := uc.product.FindAll()
+	products, err := uc.ProductUseCase.FindAll()
 	if err != nil {
 		mLogger.Error("error", zap.Error(err))
 		return nil, err
@@ -98,7 +89,7 @@ func (uc *ProductUseCase) FetchAll() ([]model.Product, error) {
 }
 
 func (uc *ProductUseCase) FetchByID(id string) (*model.ProductDetail, error) {
-	mLogger := uc.logger.With(zap.String("method", "fetchByID"))
+	mLogger := uc.Logger.With(zap.String("method", "fetchByID"))
 
 	parsedID, err := uuid.Parse(id)
 	if err != nil {
@@ -106,7 +97,7 @@ func (uc *ProductUseCase) FetchByID(id string) (*model.ProductDetail, error) {
 		return nil, errors.New("failed to parse uuid") // todo
 	}
 
-	product, err := uc.product.FindByID(parsedID)
+	product, err := uc.ProductUseCase.FindByID(parsedID)
 	if err != nil {
 		mLogger.Error("error", zap.String("id", id), zap.Error(err))
 		return nil, err
@@ -117,7 +108,7 @@ func (uc *ProductUseCase) FetchByID(id string) (*model.ProductDetail, error) {
 		return nil, errors.New("product not found")                                              // todo
 	}
 
-	category, err := uc.category.FindByID(product.CategoryID)
+	category, err := uc.CategoryUseCase.FindByID(product.CategoryID)
 	if err != nil {
 		mLogger.Error("error", zap.String("id", id), zap.Error(err))
 		return nil, errors.New("category does not exist")
